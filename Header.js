@@ -10,12 +10,6 @@ const Header = (props) => {
   )
 }
 
-return (
-  <View style={styles.header}>
-        <Image style={styles.image}  source={require('../assets/sfondo.jpg')}/>
-    
-  </View>
-)
 const styles = StyleSheet.create({
   header: {
 
