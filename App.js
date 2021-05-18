@@ -1,99 +1,142 @@
-import React from 'react';
-import { Platform, StyleSheet, Text, View, FlatList, Image} from 'react-native';
-import Header from './components/Header';
-import InputBar from './components/InputBar';
-import TodoItem from './components/TodoItem';
+import React from "react";
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Modal, ActivityIndicator } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import colors from "./Colors";
+import TodoList from "./components/TodoList";
+import AddListModal from "./components/AddListModal";
+import Fire from "./Fire";
 
 export default class App extends React.Component {
-  constructor () {
-    super();
+    state = {
+        addTodoVisible: false,
+        lists: [],
+        user: {},
+        loading: true
+    };
 
-    this.state = {
-      todoInput: '',
-      todos: [
-        { id: 0, title: 'Esempio di funzionamento 1', done: false },
-        { id: 1, title: 'Esempio di funzionamento 2', done: false }
-      ]
+    componentDidMount() {
+        firebase = new Fire((error, user) => {
+            if (error) {
+                return alert("Oh Damn, non funge qualcosa");
+            }
+
+            firebase.getLists(lists => {
+                this.setState({ lists, user }, () => {
+                    this.setState({ loading: false });
+                });
+            });
+
+            this.setState({ user });
+        });
     }
-  }
 
-  addNewTodo () {
-    let todos = this.state.todos;
+    componentWillUnmount() {
+        firebase.detach();
+    }
 
-    todos.unshift({
-      id: todos.length + 1,
-      title: this.state.todoInput,
-      done: false
-    });
+    toggleAddTodoModal() {
+        this.setState({ addTodoVisible: !this.state.addTodoVisible });
+    }
 
-    this.setState({
-      todos: todos,
-      todoInput: ''
-    });
-  }
+    renderList = list => {
+        return <TodoList list={list} updateList={this.updateList} />;
+    };
 
-  toggleDone (item) {
-    let todos = this.state.todos;
+    addList = list => {
+        firebase.addList({
+            name: list.name,
+            color: list.color,
+            todos: []
+        });
+    };
 
-    todos = todos.map((todo) => {
-      if (todo.id == item.id) {
-        todo.done = !todo.done;
-      }
+    updateList = list => {
+        firebase.updateList(list);
+    };
 
-      return todo;
-    })
-
-    this.setState({todos});
-  }
-
-  removeTodo (item) {
-    let todos = this.state.todos;
-
-    todos = todos.filter((todo) => todo.id !== item.id);
-
-    this.setState({todos});
-  }
-
-
-  render() {
-    const statusbar = (Platform.OS == 'ios') ? <View style={styles.statusbar}></View> : <View></View>;
-
-    return (
-      <View style={styles.container}>
-        {statusbar}
-
-        <Header title="Vision" />
-
-        <InputBar
-          addNewTodo={() => this.addNewTodo()}
-          textChange={todoInput => this.setState({ todoInput })}
-          todoInput={this.state.todoInput}
-        />
-
-        <FlatList
-          data={this.state.todos}
-          extraData={this.state}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({item, index}) => {
+    render() {
+        if (this.state.loading) {
             return (
-              <TodoItem todoItem={item} toggleDone={() => this.toggleDone(item)} removeTodo={() => this.removeTodo(item)} />
-            )
-          }}
-        />
-      </View>
-    );
-  }
+                <View style={styles.container}>
+                    <ActivityIndicator size="large" color={colors.blue} />
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.container}>
+                <Modal
+                    animationType="slide"
+                    visible={this.state.addTodoVisible}
+                    onRequestClose={() => this.toggleAddTodoModal()}
+                >
+                    <AddListModal closeModal={() => this.toggleAddTodoModal()} addList={this.addList} />
+                </Modal>
+
+                <View style={{ flexDirection: "row" }}>
+                    <View style={styles.divider} />
+                    <Text style={styles.title}>
+                        Vision <Text style={{ fontWeight: "300", color: colors.purple }}>App</Text>
+                    </Text>
+                    <View style={styles.divider} />
+                </View>
+
+                <View style={{ marginVertical: 48 }}>
+                    <TouchableOpacity style={styles.addList} onPress={() => this.toggleAddTodoModal()}>
+                        <AntDesign name="plus" size={16} color={colors.purple} />
+                    </TouchableOpacity>
+
+                    <Text style={styles.add}>Aggiungi Spazio</Text>
+                </View>
+
+                <View style={{ height: 275, paddingLeft: 32 }}>
+                    <FlatList
+                        data={this.state.lists}
+                        keyExtractor={item => item.id.toString()}
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({ item }) => this.renderList(item)}
+                        keyboardShouldPersistTaps="always"
+                    />
+                </View>
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-   backgroundColor: '#fff', 
-  },
-  statusbar: {
-    backgroundColor: '#000000',
-    height: 20,
-    
-  }
-  
+    container: {
+        flex: 1,
+        backgroundColor: "#fff",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    divider: {
+        backgroundColor: colors.purple,
+        height: 1,
+        flex: 1,
+        alignSelf: "center"
+    },
+    title: {
+        fontSize: 38,
+        fontWeight: "800",
+        color: colors.black,
+        paddingHorizontal: 64
+    },
+    addList: {
+        borderWidth: 2,
+        borderColor: colors.purple,
+        borderRadius: 4,
+        padding: 16,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    add: {
+        color: colors.purple,
+        fontWeight: "600",
+        fontSize: 14,
+        marginTop: 8
+
+    }
+   
 });
