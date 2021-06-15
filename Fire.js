@@ -9,7 +9,7 @@ const firebaseConfig = {
     messagingSenderId: "307250136154",
     appId: "1:307250136154:web:32c454f3b7992872c58463"
 };
-
+const currentDate = new Date();
 class Fire {
     constructor(callback) {
         this.init(callback);
@@ -41,7 +41,7 @@ class Fire {
             lists = [];
 
             snapshot.forEach(doc => {
-                lists.push({ id: doc.id, ...doc.data() });
+                lists.push({ id: doc.id, date: currentDate.getTime(),...doc.data() });
             });
 
             callback(lists);
