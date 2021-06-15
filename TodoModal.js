@@ -14,7 +14,7 @@ import {
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import colors from "../Colors";
 import { Swipeable } from "react-native-gesture-handler";
-
+const currentDate = new Date();
 export default class TodoModal extends React.Component {
     state = {
         newTodo: ""
@@ -23,7 +23,9 @@ export default class TodoModal extends React.Component {
     toggleTodoCompleted = index => {
         let list = this.props.list;
         list.todos[index].completed = !list.todos[index].completed;
-
+        //--------------------
+        //list.todos[index].date = 
+        //--------------------
         this.props.updateList(list);
     };
 
@@ -31,7 +33,7 @@ export default class TodoModal extends React.Component {
         let list = this.props.list;
 
         if (!list.todos.some(todo => todo.title === this.state.newTodo)) {
-            list.todos.push({ title: this.state.newTodo, completed: false });
+            list.todos.push({ title: this.state.newTodo,date: currentDate.getTime(), completed: false });
 
             this.props.updateList(list);
         }
@@ -105,9 +107,11 @@ export default class TodoModal extends React.Component {
 
     render() {
         const list = this.props.list;
-
+        const data_timestamp = list.date;
         const taskCount = list.todos.length;
         const completedCount = list.todos.filter(todo => todo.completed).length;
+        let date = new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(data_timestamp);
+        //const data = list.todos;
 
 // Sezione conta i task e ti dice quanti ne mancano una volta aperto uno Spazio
         return (
@@ -124,9 +128,16 @@ export default class TodoModal extends React.Component {
                     <View style={[styles.section, styles.header, { borderBottomColor: list.color }]}>
                         <View>
                             <Text style={styles.title}>{list.name}</Text>
+                            
                             <Text style={styles.taskCount}>
-                                {completedCount} di {taskCount} cose da fare
+                                {completedCount} di {taskCount} Task
+                                
                             </Text>
+                            <Text style={styles.taskCount}>
+                                Spazio creato il {date}
+                                
+                            </Text>
+                           
                         </View>
                     </View>
 
@@ -137,6 +148,8 @@ export default class TodoModal extends React.Component {
                             keyExtractor={item => item.title}
                             showsVerticalScrollIndicator={false}
                         />
+                        {/*<Text style={styles.title}>{data_timestamp}</Text>*/}
+                        
                     </View>
 
                     <View style={[styles.section, styles.footer]}>
