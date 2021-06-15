@@ -2,23 +2,27 @@ import React from "react";
 import { View, Text, StyleSheet, KeyboardAvoidingView, TouchableOpacity, TextInput } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import colors from "../Colors";
+const currentDate = new Date();
 
+//form per scegliere nome, colore dello spazio, la data in automatico
 export default class AddListModal extends React.Component {
     backgroundColors = ["#5CD859", "#24A6D9", "#595BD9", "#8022D9", "#D159D8", "#D85963", "#D88559"];
 
     state = {
         name: "",
+        date: currentDate.getTime(),
         color: this.backgroundColors[0]
     };
 
     createTodo = () => {
-        const { name, color } = this.state;
+        const { name, date, color } = this.state;
 
-        const list = { name, color };
+        const list = { name, date, color };
 
         this.props.addList(list);
-
+        
         this.setState({ name: "" });
+        this.setState({ date: currentDate.getTime() });
         this.props.closeModal();
     };
 
@@ -38,24 +42,30 @@ export default class AddListModal extends React.Component {
 
     render() {
         return (
+            //Chiusura della schermata di creazione
             <KeyboardAvoidingView style={styles.container} behavior="padding">
                 <TouchableOpacity style={{ position: "absolute", top: 64, right: 32 }} onPress={this.props.closeModal}>
                     <AntDesign name="close" size={24} color={colors.black} />
                 </TouchableOpacity>
 
-                <View style={{ alignSelf: "stretch", marginHorizontal: 32 }}>
+                    {/* Testo crea uno spazio */}
+                   <View style={{ alignSelf: "stretch", marginHorizontal: 32 }}>
                     <Text style={styles.title}>Crea uno Spazio</Text>
 
+
+                     {/* Testo di Input per settare un nome */}
                     <TextInput
                         style={styles.input}
                         placeholder="Come vuoi chiamare lo Spazio?"
-                        onChangeText={text => this.setState({ name: text })}
+                        onChangeText={text => this.setState({ name: text, date: currentDate.getTime() })}
                     />
 
+                     {/* Settaggio colore dello spazio*/}
                     <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 12 }}>
                         {this.renderColors()}
                     </View>
 
+                     {/*Bottone per creazione dello spazio con parametri impostati precedentemente */}
                     <TouchableOpacity
                         style={[styles.create, { backgroundColor: this.state.color }]}
                         onPress={this.createTodo}
