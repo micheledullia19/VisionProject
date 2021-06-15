@@ -17,6 +17,8 @@ export default class TodoList extends React.Component {
 
         const completedCount = list.todos.filter(todo => todo.completed).length;
         const remainingCount = list.todos.length - completedCount;
+        const tempocreato = list.date;
+        //var formatted = tempocreato.format("dd.mm.yyyy hh:MM:ss");
 
         return (
             <View>
@@ -44,6 +46,7 @@ export default class TodoList extends React.Component {
                         <View style={{ alignItems: "center" }}>
                             <Text style={styles.count}>{remainingCount}</Text>
                             <Text style={styles.subtitle}>Rimasti</Text>
+                            
                         </View>
                         <View style={{ alignItems: "center" }}>
                             <Text style={styles.count}>{completedCount}</Text>
